@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+
+  <div id="scaler">
+  <div id="game-container">
+
+    <!-- Columna izquierda: información del juego y controles -->
+    <div id="info-panel">
+      <h1 id="game-title">TETRIS</h1>
+
+      <div id="theme-picker">
+        <label for="theme-select">Tema</label>
+        <select id="theme-select">
+          <option value="clasico" selected>Clásico</option>
+          <option value="neon">Neón</option>
+          <option value="oceano">Océano</option>
+          <option value="fuego">Fuego</option>
+          <option value="esmeralda">Esmeralda</option>
+          <option value="cereza">Cereza</option>
+          <option value="noche">Noche</option>
+          <option value="aurora">Aurora</option>
+        </select>
+      </div>
+
+      <div id="mode-box">
+        <label for="mode-select">Modo</label>
+        <select id="mode-select">
+          <option value="maraton" selected>Maratón</option>
+          <option value="relax">Relax</option>
+        </select>
+      </div>
+
+      <div id="score-box">
+        <div class="label">PUNTOS</div>
+        <div id="score">0</div>
+      </div>
+      <div id="level-box">
+        <div class="label">NIVEL</div>
+        <div id="level">1</div>
+      </div>
+      <div id="lines-box">
+        <div class="label">LÍNEAS</div>
+        <div id="lines">0</div>
+      </div>
+
+      <div id="game-controls">
+        <button id="start-btn">▶ INICIAR</button>
+        <button id="pause-btn" disabled>⏸ PAUSA</button>
+        <button id="restart-btn2">↻ REINICIAR</button>
+      </div>
+    </div>
+
+    <!-- Columna central: tablero -->
+    <div id="board-area">
+      <canvas id="board-canvas"></canvas>
+      <div id="garbage-bar" class="hidden">
+        <div class="label">LÍNEAS DE BASURA</div>
+        <div id="garbage-count">0</div>
+      </div>
+      <div id="line-effect-box" class="hidden"></div>
+      <div id="start-overlay">
+        <h2>TETRIS</h2>
+        <p>¡Preparado para jugar!</p>
+        <button id="start-overlay-btn">INICIAR PARTIDA</button>
+      </div>
+      <div id="game-over-overlay" class="hidden">
+        <h2>GAME OVER</h2>
+        <p id="new-record" class="hidden">¡NUEVO RÉCORD!</p>
+        <p id="final-score"></p>
+        <div id="name-entry" class="hidden">
+          <label for="player-name">Tu nombre:</label>
+          <input type="text" id="player-name" maxlength="12" placeholder="Jugador">
+          <button id="save-score-btn">Guardar</button>
+        </div>
+        <button id="restart-btn">REINICIAR</button>
+      </div>
+      <div id="pause-overlay" class="hidden">
+        <h2>PAUSA</h2>
+        <p>Pulsa P para continuar</p>
+      </div>
+      <div id="touch-controls" class="hidden">
+        <div class="touch-row">
+          <button class="t-btn" data-act="hold">HOLD</button>
+          <button class="t-btn" data-act="rotate">ROTAR</button>
+        </div>
+        <div class="touch-row">
+          <button class="t-btn" data-act="left">◀</button>
+          <button class="t-btn" data-act="right">▶</button>
+          <button class="t-btn" data-act="harddrop">⤓</button>
+        </div>
+        <div class="touch-row">
+          <button class="t-btn wide" data-act="down">▼</button>
+        </div>
+        <div class="touch-row">
+          <button class="t-btn" data-act="pause">PAUSA</button>
+          <button class="t-btn" data-act="sound">SONIDO</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna derecha: estadísticas y piezas -->
+    <div id="side-panel">
+      <div id="stats-box">
+        <div class="label">ESTADÍSTICAS</div>
+        <p>Piezas: <span id="stat-pieces">0</span></p>
+        <p>Líneas: <span id="stat-lines">0</span></p>
+        <p>Tetrises: <span id="stat-tetrises">0</span></p>
+        <p>Combo: <span id="stat-combo">0</span></p>
+        <p>Tiempo: <span id="stat-time">00:00</span></p>
+        <p>Precisión: <span id="stat-acc">100%</span></p>
+      </div>
+
+      <div id="hold-box">
+        <div class="label">MANTENER</div>
+        <canvas id="hold-canvas"></canvas>
+      </div>
+
+      <div id="next-box">
+        <div class="label">SIGUIENTE</div>
+        <canvas id="next-canvas"></canvas>
+      </div>
+
+      <div id="high-scores-box">
+        <div class="label">MEJORES PUNTUACIONES</div>
+        <ol id="high-scores"></ol>
+      </div>
+
+      <div id="controls">
+        <p>← → mover</p>
+        <p>↑ rotar</p>
+        <p>↓ bajar</p>
+        <p>Espacio caída</p>
+        <p>C sostener</p>
+        <p>M sonido</p>
+        <p>P pausa</p>
+      </div>
+
+      <div id="youtube-box">
+        <div class="label">FONDO DE YOUTUBE</div>
+        <input type="text" id="yt-url" placeholder="URL o ID de YouTube">
+        <button id="yt-play-btn">▶ REPRODUCIR CON AUDIO</button>
+        <button id="yt-stop-btn">■ DETENER</button>
+        <div class="yt-row">
+          <label for="yt-volume">Vol. video</label>
+          <input type="range" id="yt-volume" min="0" max="100" value="80">
+        </div>
+        <div class="yt-row">
+          <label for="viz-style">Vizualizador</label>
+          <select id="viz-style">
+            <option value="barras" selected>Barras</option>
+            <option value="ondas">Ondas</option>
+            <option value="circular">Circular</option>
+            <option value="espectro">Espectro radial</option>
+            <option value="niebla">Niebla</option>
+          </select>
+        </div>
+        <button id="mic-btn" class="mic-off">🎤 ACTIVAR AUDIO DEL VIDEO</button>
+        <button id="tab-audio-btn" class="mic-off">🔊 CAPTURAR AUDIO DE OTRA PESTAÑA</button>
+        <p id="mic-hint">Para que el visualizador reaccione al audio del video, activa el micrófono (captura el sonido del sistema). El video siempre se escucha.</p>
+      </div>
+    </div>
+
+  </div>
+  </div>
+
+  <!-- Reproductor de YouTube de fondo -->
+  <div id="yt-wrapper" class="hidden">
+    <div id="yt-video"></div>
+    <div id="yt-visualizer">
+      <canvas id="viz-canvas"></canvas>
+    </div>
+    <div id="yt-titlebar">
+      <span id="yt-title">YouTube de fondo</span>
+      <button id="yt-close">✕</button>
+    </div>
+  </div>
+
+  <!-- Aviso para activar el audio (fuera del wrapper para que esté por encima del juego) -->
+  <div id="yt-audio-overlay" style="display: none;">
+    <button id="yt-audio-hint">▶ PULSA PARA ACTIVAR EL AUDIO</button>
+    <button id="yt-fallback-btn" style="display: none;">▶ ABRIR EN YOUTUBE</button>
+  </div>
+
+  <!-- Capa de animaciones flotantes (combos, tetris, etc.) -->
+  <div id="fx-layer"></div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="game.js"></script>
+</body>
+</html>
